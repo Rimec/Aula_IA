@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA em Jogos – Construct 3 · Kids</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:#12121f;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
+
+/* ── progress ── */
+#prog{position:fixed;top:0;left:0;height:6px;background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77);transition:width .35s;z-index:999}
+
+/* ── nav ── */
+.nav{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:10px 22px;z-index:998}
+.nav button{background:#ff6b6b;color:#fff;border:none;border-radius:40px;padding:9px 24px;font-size:.95rem;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;transition:all .15s}
+.nav button:hover{background:#ff4757;transform:scale(1.05)}
+.nav button:disabled{background:#444;cursor:default;transform:none}
+#ctr{color:#fff;font-weight:700;min-width:64px;text-align:center;font-size:.95rem}
+
+/* ── slides ── */
+.wrap{width:100vw;height:100vh;position:relative}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:56px 72px 96px;opacity:0;transition:opacity .35s}
+.slide.on{display:flex;opacity:1}
+
+/* ── typography ── */
+h1{font-size:2.7rem;font-weight:900;line-height:1.15;text-align:center;color:#fff}
+h2{font-size:1.9rem;font-weight:900;color:#fff;margin-bottom:14px}
+h3{font-size:1.15rem;font-weight:700;color:#fff;margin-bottom:6px}
+p,li{font-size:1rem;line-height:1.65;color:rgba(255,255,255,.88)}
+ul{list-style:none;padding:0}
+
+/* ── badges / tags ── */
+.badge{display:inline-block;background:rgba(255,255,255,.15);border-radius:40px;padding:4px 18px;font-size:.82rem;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:14px}
+.pill{display:inline-block;background:linear-gradient(90deg,#ff6b6b,#ffd93d);color:#12121f;border-radius:40px;padding:8px 28px;font-weight:900;font-size:.95rem;margin-top:20px}
+.tag{display:inline-block;border-radius:8px;padding:3px 12px;font-size:.82rem;font-weight:700;margin:3px}
+
+/* ── grids ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;width:100%}
+.g12{display:grid;grid-template-columns:1fr 1.3fr;gap:18px;width:100%}
+
+/* ── cards ── */
+.card{border-radius:16px;padding:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13)}
+
+/* ── tip / warn ── */
+.tip{background:rgba(255,211,61,.12);border:2px solid #ffd93d;border-radius:14px;padding:13px 18px;display:flex;gap:10px;align-items:flex-start;width:100%}
+.tip .ico{font-size:1.5rem;flex-shrink:0}
+.warn{background:rgba(255,107,107,.12);border:2px solid #ff6b6b;border-radius:14px;padding:13px 18px;display:flex;gap:10px;align-items:flex-start;width:100%}
+
+/* ── print placeholder ── */
+.px{border:3px dashed rgba(255,255,255,.35);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.04);padding:16px;text-align:center;min-height:120px;color:rgba(255,255,255,.5);position:relative;flex:1}
+.px img{position:absolute;inset:8px;width:calc(100% - 16px);height:calc(100% - 16px);object-fit:contain;border-radius:8px;display:block}
+.px .pi{font-size:2.2rem}
+.px .pl{font-weight:700;font-size:.95rem;color:rgba(255,255,255,.8)}
+.px .ph{font-size:.78rem;color:rgba(255,255,255,.4)}
+
+/* ── step circles ── */
+.sr{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.06);border-radius:14px;padding:13px 16px;margin-bottom:10px;width:100%}
+.sc{width:40px;height:40px;min-width:40px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;color:#fff}
+.sc.red{background:#ff6b6b}
+.sc.grn{background:#6bcb77}
+.sc.yel{background:#ffd93d;color:#12121f}
+.sc.blu{background:#8be9fd;color:#12121f}
+
+/* ── CODE blocks ── */
+pre.cb{background:#0a0a18;border:2px solid rgba(255,255,255,.12);border-radius:14px;padding:16px 20px;font-family:'Courier New',monospace;font-size:.88rem;color:#f8f8f2;width:100%;line-height:1.85;overflow-x:auto;white-space:pre}
+.kw{color:#ff79c6;font-weight:bold}
+.vl{color:#50fa7b}
+.cm{color:#6272a4;font-style:italic}
+.ev{color:#ffd93d;font-weight:bold}
+.ac{color:#8be9fd}
+.fn{color:#ffb86c}
+
+/* ── UI path ── */
+.uipath{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;margin:6px 0}
+.ui{background:#2d2d4a;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:2px 10px;font-size:.82rem;font-weight:700;color:#ffd93d}
+.arr{color:rgba(255,255,255,.4);font-size:.9rem}
+
+/* ── menu screenshot mockup ── */
+.mock-menu{background:#1e1e30;border:1.5px solid #444;border-radius:10px;padding:12px 0;min-width:200px;font-size:.85rem}
+.mock-menu .mi{padding:6px 18px;color:rgba(255,255,255,.85);cursor:default}
+.mock-menu .mi:hover,.mock-menu .mi.sel{background:#3a3a5c;color:#ffd93d}
+.mock-menu .sep{border-top:1px solid #333;margin:4px 0}
+
+/* ── event row ── */
+.ev-row{background:#0d1117;border:1.5px solid #30363d;border-radius:10px;padding:10px 14px;margin-bottom:8px;width:100%}
+.ev-cond{color:#79c0ff;font-size:.88rem;font-weight:700}
+.ev-act{color:#7ee787;font-size:.88rem;padding-left:20px;margin-top:3px}
+.ev-sub{color:#d2a8ff;font-size:.85rem;padding-left:36px;margin-top:2px}
+.ev-label{font-size:.72rem;background:#30363d;color:#8b949e;border-radius:4px;padding:1px 8px;margin-bottom:4px;display:inline-block}
+
+/* ── arrow flow ── */
+.aflow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0}
+.sbox{background:rgba(255,255,255,.15);border-radius:12px;padding:10px 18px;font-weight:700;font-size:.9rem;border:2px solid rgba(255,255,255,.25);text-align:center;color:#fff}
+.arro{font-size:1.4rem;color:#ffd93d}
+
+/* ── THEMES ── */
+#s1{background:linear-gradient(135deg,#0f0c29,#302b63,#24243e)}
+#s2{background:linear-gradient(135deg,#12121f,#1a1a3e)}
+#s3{background:linear-gradient(135deg,#12121f,#0f3460)}
+#s4{background:linear-gradient(135deg,#1a0533,#0f3460)}
+#s5{background:linear-gradient(135deg,#12121f,#1a3a1a)}
+#s6{background:linear-gradient(135deg,#0f1923,#12121f)}
+#s7{background:linear-gradient(135deg,#12121f,#1f0a2e)}
+#s8{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364)}
+#s9{background:linear-gradient(135deg,#1a0533,#12121f)}
+#s10{background:linear-gradient(135deg,#12121f,#0f3460)}
+#s11{background:linear-gradient(135deg,#0f3460,#1a0533)}
+#s12{background:linear-gradient(135deg,#12121f,#1a3a1a)}
+#s13{background:linear-gradient(135deg,#1a0533,#1a1a0a)}
+#s14{background:linear-gradient(135deg,#0f3460,#12121f)}
+#s15{background:linear-gradient(135deg,#12121f,#1f0a2e)}
+#s16{background:linear-gradient(135deg,#1f0a2e,#0f3460)}
+#s17{background:linear-gradient(135deg,#0f3460,#12121f)}
+#s18{background:linear-gradient(135deg,#12121f,#0f2027)}
+#s19{background:linear-gradient(135deg,#1a3a1a,#0f3460)}
+#s20{background:linear-gradient(135deg,#302b63,#ff6b6b44)}
+#s21{background:linear-gradient(135deg,#ff6b6b,#ffd93d,#6bcb77)}
+
+.light h1,.light h2,.light h3,.light p,.light li,.light .badge{color:#12121f!important}
+.light .card{background:rgba(0,0,0,.1)!important;border-color:rgba(0,0,0,.15)!important}
+.light p,.light li{color:rgba(0,0,0,.8)!important}
+
+/* inline highlight */
+code{background:rgba(255,255,255,.12);border-radius:5px;padding:1px 7px;font-family:'Courier New',monospace;font-size:.88em;color:#ffd93d}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<div class="wrap">
+
+<!-- ═══════════ S1 TÍTULO ═══════════ -->
+<div class="slide on" id="s1">
+  <div style="font-size:3.2rem;margin-bottom:18px;letter-spacing:8px">🤖🎮👾🧠🕹️</div>
+  <div class="badge">Construct 3 · Turma Kids · IA em Jogos</div>
+  <h1>Inimigos e NPCs<br>Inteligentes!</h1>
+  <p style="text-align:center;margin-top:14px;max-width:600px;color:rgba(255,255,255,.7)">Como criar personagens que pensam, patrulham, perseguem e falam — do zero!</p>
+  <span class="pill">🚀 Tutorial passo a passo no Construct 3</span>
+</div>
+
+<!-- ═══════════ S2 O QUE É IA ═══════════ -->
+<div class="slide" id="s2">
+  <div class="badge">Conceito 1</div>
+  <h2>🤔 O que é IA num jogo?</h2>
+  <div class="g2" style="margin-top:8px">
+    <div class="card">
+      <h3>🧠 Definição simples</h3>
+      <p>IA = um conjunto de <strong>regras</strong> que fazem o personagem agir sozinho, sem o jogador controlar!</p>
+      <div style="margin-top:12px;background:rgba(255,107,107,.15);border-radius:10px;padding:12px">
+        <p style="text-align:center;font-size:1.1rem;font-weight:700">SE <span style="color:#ffd93d">condição</span> → ENTÃO <span style="color:#6bcb77">ação</span></p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🎮 Exemplos que você conhece</h3>
+      <ul style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+        <li>🟢 <strong>Creeper (Minecraft)</strong><br><small>SE perto do jogador → explode</small></li>
+        <li>🔴 <strong>Goomba (Mario)</strong><br><small>SE bater na parede → vira</small></li>
+        <li>🟡 <strong>Fantasma (Pac-Man)</strong><br><small>SE pílula comida → foge</small></li>
+      </ul>
+    </div>
+  </div>
+  <div class="tip" style="margin-top:14px">
+    <span class="ico">💡</span>
+    <p>No Construct 3, a IA é feita com <strong>Eventos</strong> (blocos de SE → ENTÃO) na <strong>Event Sheet</strong>. Não precisa saber código!</p>
+  </div>
+</div>
+
+<!-- ═══════════ S3 MÁQUINA DE ESTADOS ═══════════ -->
+<div class="slide" id="s3">
+  <div class="badge">Conceito 2 — Essencial!</div>
+  <h2>🔄 Máquina de Estados</h2>
+  <p style="text-align:center;margin-bottom:16px">Um personagem pode estar em diferentes <strong>estados</strong>. Quando algo acontece, ele <em>troca de estado</em>!</p>
+  <div class="aflow">
+    <div class="sbox">😴 PATRULHA<br><small style="opacity:.6">andando</small></div>
+    <div class="arro">→<br><small style="color:rgba(255,255,255,.5);font-size:.7rem">jogador<br>perto</small></div>
+    <div class="sbox" style="border-color:#ffd93d;color:#ffd93d">👀 AVISTOU<br><small style="opacity:.7">detectou</small></div>
+    <div class="arro">→<br><small style="color:rgba(255,255,255,.5);font-size:.7rem">perseguir</small></div>
+    <div class="sbox" style="border-color:#ff6b6b;color:#ff6b6b">🏃 PERSEGUE<br><small style="opacity:.7">correndo</small></div>
+    <div class="arro">→<br><small style="color:rgba(255,255,255,.5);font-size:.7rem">perto<br>demais</small></div>
+    <div class="sbox" style="border-color:#ff4757;color:#ff4757">⚔️ ATACA<br><small style="opacity:.7">dano</small></div>
+  </div>
+  <div class="g2" style="margin-top:12px">
+    <div class="card">
+      <h3>📦 Como guardar o estado?</h3>
+      <p>Criamos uma <strong>Instance Variable</strong> no objeto chamada <code>estado</code> que guarda um texto:</p>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <span class="tag" style="background:#ffd93d22;border:1.5px solid #ffd93d;color:#ffd93d">"patrulha"</span>
+        <span class="tag" style="background:#ff6b6b22;border:1.5px solid #ff6b6b;color:#ff6b6b">"persegue"</span>
+        <span class="tag" style="background:#6bcb7722;border:1.5px solid #6bcb77;color:#6bcb77">"ataca"</span>
+        <span class="tag" style="background:#8be9fd22;border:1.5px solid #8be9fd;color:#8be9fd">"foge"</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🎯 Na Event Sheet</h3>
+      <p>Cada grupo de eventos só roda quando o estado é certo:</p>
+      <div class="ev-row" style="margin-top:8px">
+        <div class="ev-cond">Inimigo.estado = "patrulha"</div>
+        <div class="ev-act">→ andar, virar na borda…</div>
+      </div>
+      <div class="ev-row">
+        <div class="ev-cond">Inimigo.estado = "persegue"</div>
+        <div class="ev-act">→ correr em direção ao player…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S4 VISÃO GERAL DO PROJETO ═══════════ -->
+<div class="slide" id="s4">
+  <div class="badge">Projeto da Aula</div>
+  <h2>🗺️ O que vamos construir</h2>
+  <div class="g2" style="margin-top:12px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="sr"><div class="sc yel">A</div><div><h3 style="color:#ffd93d">Cenário base</h3><p>Layout com chão, plataformas e um jogador com física</p></div></div>
+      <div class="sr"><div class="sc red">B</div><div><h3 style="color:#ff6b6b">Inimigo Patrulheiro</h3><p>Anda sozinho na plataforma e vira na borda</p></div></div>
+      <div class="sr"><div class="sc red">C</div><div><h3 style="color:#ff6b6b">Detecção + Perseguição</h3><p>Inimigo vê o jogador e corre atrás dele</p></div></div>
+      <div class="sr"><div class="sc grn">D</div><div><h3 style="color:#6bcb77">NPC com Diálogo</h3><p>Personagem amigo que fala ao se aproximar</p></div></div>
+    </div>
+    <div class="px">
+      <img src="./prints/1.png">
+    </div>
+  </div>
+  <div class="tip" style="margin-top:12px">
+    <span class="ico">⏱️</span>
+    <p>Tempo estimado: <strong>60–75 minutos</strong> · Siga os slides em ordem · Cada passo tem um print para conferir!</p>
+  </div>
+</div>
+
+<!-- ═══════════ S5 CRIAR PROJETO ═══════════ -->
+<div class="slide" id="s5">
+  <div class="badge">Passo A · 1 de 3 — Novo Projeto</div>
+  <h2>🆕 Abrindo o Construct 3</h2>
+  <div class="g12">
+    <div>
+      <div class="sr"><div class="sc yel">1</div><div><p>Acesse <strong>editor.construct.net</strong> no navegador</p></div></div>
+      <div class="sr"><div class="sc yel">2</div><div><p>Clique em <strong>"New Project"</strong> na tela inicial</p></div></div>
+      <div class="sr"><div class="sc yel">3</div><div>
+        <p>Escolha <strong>"New empty project"</strong></p>
+        <div class="mock-menu" style="margin-top:8px;max-width:240px">
+          <div class="mi">📄 New empty project</div>
+          <div class="mi">🎮 Example: Platformer</div>
+          <div class="mi">🔫 Example: Top-down shooter</div>
+        </div>
+      </div></div>
+      <div class="sr"><div class="sc yel">4</div><div><p>No topo esquerdo clique em <strong>⚙️ Project Properties</strong> → mude o nome para <code>IA_Aula</code></p></div></div>
+      <div class="tip" style="margin-top:8px">
+        <span class="ico">💾</span>
+        <p>Salve sempre com <strong>Ctrl+S</strong>!</p>
+      </div>
+    </div>
+    <div class="px">
+      <img src="./prints/2.png">
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S6 CRIAR CHÃO ═══════════ -->
+<div class="slide" id="s6">
+  <div class="badge">Passo A · 2 de 3 — Cenário</div>
+  <h2>🏗️ Criando o Chão e as Paredes</h2>
+  <div class="g12">
+    <div>
+      <div class="sr"><div class="sc yel">1</div><div>
+        <p>No <strong>Layout 1</strong>, dê <strong>duplo clique</strong> numa área vazia</p>
+        <p style="color:rgba(255,255,255,.5);font-size:.85rem;margin-top:4px">→ Abre a janela "Insert new object"</p>
+      </div></div>
+      <div class="sr"><div class="sc yel">2</div><div>
+        <p>Procure e selecione <strong>Tiled Background</strong> → clique <strong>Insert</strong></p>
+        <div class="uipath"><span class="ui">Insert new object</span><span class="arr">›</span><span class="ui">Tiled Background</span><span class="arr">›</span><span class="ui">Insert</span></div>
+      </div></div>
+      <div class="sr"><div class="sc yel">3</div><div>
+        <p>Nomeie o objeto como <code>Chao</code></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Escolha uma cor ou textura no editor de imagem</p>
+      </div></div>
+      <div class="sr"><div class="sc yel">4</div><div>
+        <p>Arraste para criar um retângulo largo na parte de baixo do layout</p>
+      </div></div>
+      <div class="sr"><div class="sc yel">5</div><div>
+        <p>Com o <code>Chao</code> selecionado, no painel direito:<br>
+        <strong>Add behavior → Solid</strong></p>
+        <div class="uipath"><span class="ui">Properties</span><span class="arr">›</span><span class="ui">Behaviors</span><span class="arr">›</span><span class="ui">+ Add</span><span class="arr">›</span><span class="ui">Solid</span></div>
+      </div></div>
+      <div class="warn" style="margin-top:8px">
+        <span class="ico">⚠️</span>
+        <p><strong>Importante:</strong> Sem o Behavior <strong>Solid</strong>, o Player vai cair através do chão!</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="px">
+        <img src="./prints/3.png">
+      </div>
+      <div class="px">
+        <img src="./prints/4.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S7 CRIAR PLAYER ═══════════ -->
+<div class="slide" id="s7">
+  <div class="badge">Passo A · 3 de 3 — Jogador</div>
+  <h2>🧑 Criando o Jogador (Player)</h2>
+  <div class="g12">
+    <div>
+      <div class="sr"><div class="sc blu">1</div><div>
+        <p>Dê <strong>duplo clique</strong> no layout → escolha <strong>Sprite</strong> → <strong>Insert</strong></p>
+      </div></div>
+      <div class="sr"><div class="sc blu">2</div><div>
+        <p>No editor de imagem, desenhe um boneco ou importe uma imagem</p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Tamanho sugerido: 48×64 pixels</p>
+      </div></div>
+      <div class="sr"><div class="sc blu">3</div><div>
+        <p>Feche o editor e nomeie o objeto como <code>Player</code></p>
+      </div></div>
+      <div class="sr"><div class="sc blu">4</div><div>
+        <p>Adicione os seguintes Behaviors ao Player:</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          <span class="tag" style="background:#ffd93d22;border:1.5px solid #ffd93d;color:#ffd93d">🏃 Platform</span>
+          <span class="tag" style="background:#8be9fd22;border:1.5px solid #8be9fd;color:#8be9fd">📷 Scroll To</span>
+        </div>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5);margin-top:4px">Platform = física de pular · Scroll To = câmera segue o player</p>
+      </div></div>
+      <div class="sr"><div class="sc blu">5</div><div>
+        <p>Posicione o Player <strong>em cima do chão</strong> no layout</p>
+      </div></div>
+      <div class="tip" style="margin-top:8px">
+        <span class="ico">▶️</span>
+        <p>Aperte <strong>F5</strong> agora para testar! O Player já deve pular com <strong>seta cima / Z</strong> e mover com <strong>← →</strong>.</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="px" style="height:155px">
+        <img src="./prints/5.png">
+      </div>
+      <div class="px" style="height:130px">
+        <img src="./prints/6.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S8 CRIAR INIMIGO SPRITE ═══════════ -->
+<div class="slide" id="s8">
+  <div class="badge">Passo B · 1 de 5 — Inimigo</div>
+  <h2>😈 Criando o Sprite do Inimigo</h2>
+  <div class="g12">
+    <div>
+      <div class="sr"><div class="sc red">1</div><div>
+        <p>Dê <strong>duplo clique</strong> no layout → <strong>Sprite</strong> → <strong>Insert</strong></p>
+      </div></div>
+      <div class="sr"><div class="sc red">2</div><div>
+        <p>Crie um desenho diferente do Player (cor vermelha, olho irritado…)</p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Sugestão: retângulo vermelho com dois olhos brancos!</p>
+      </div></div>
+      <div class="sr"><div class="sc red">3</div><div>
+        <p>Feche e nomeie como <code>Inimigo</code></p>
+      </div></div>
+      <div class="sr"><div class="sc red">4</div><div>
+        <p>Adicione o Behavior <strong>Platform</strong> ao Inimigo</p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Isso dá física de plataforma para ele também!</p>
+      </div></div>
+      <div class="sr"><div class="sc red">5</div><div>
+        <p>No painel de propriedades, em <strong>Platform</strong>:<br>
+        Mude <code>Default controls</code> para <strong>No</strong></p>
+        <div class="uipath"><span class="ui">Properties</span><span class="arr">›</span><span class="ui">Platform</span><span class="arr">›</span><span class="ui">Default controls → No</span></div>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5);margin-top:4px">Isso desativa o teclado no inimigo — <em>nós</em> vamos controlar ele pelos Eventos!</p>
+      </div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="px" style="height:155px">
+        <img src="./prints/7.png">
+      </div>
+      <div class="px" style="height:130px">
+        <img src="./prints/8.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S9 VARIÁVEIS DO INIMIGO ═══════════ -->
+<div class="slide" id="s9">
+  <div class="badge">Passo B · 2 de 5 — Variáveis</div>
+  <h2>📦 Adicionando Variáveis ao Inimigo</h2>
+  <p style="margin-bottom:14px">Variáveis guardam informações <em>dentro</em> do objeto. Vamos criar <strong>3</strong>!</p>
+  <div class="g2">
+    <div>
+      <h3 style="margin-bottom:10px;color:#ffd93d">Como criar uma Instance Variable:</h3>
+      <div class="sr"><div class="sc yel">1</div><div><p>Clique com <strong>botão direito</strong> no objeto <code>Inimigo</code> no layout</p></div></div>
+      <div class="sr"><div class="sc yel">2</div><div><p>Escolha <strong>"Instance variables…"</strong> no menu</p></div></div>
+      <div class="sr"><div class="sc yel">3</div><div><p>Clique em <strong>"+" (Add variable)</strong></p></div></div>
+      <div class="sr"><div class="sc yel">4</div><div>
+        <p>Crie a variável <code>estado</code>:</p>
+        <div style="background:#0a0a18;border-radius:10px;padding:10px 14px;margin-top:6px;font-size:.85rem">
+          <p>📛 Name: <code style="color:#50fa7b">estado</code> · Type: <code style="color:#8be9fd">Text</code> · Value: <code style="color:#ffd93d">"patrulha"</code></p>
+        </div>
+      </div></div>
+      <div class="sr"><div class="sc yel">5</div><div>
+        <p>Crie a variável <code>direcao</code>:</p>
+        <div style="background:#0a0a18;border-radius:10px;padding:10px 14px;margin-top:6px;font-size:.85rem">
+          <p>📛 Name: <code style="color:#50fa7b">direcao</code> · Type: <code style="color:#8be9fd">Number</code> · Value: <code style="color:#ffd93d">1</code></p>
+          <p style="color:#6272a4;font-size:.8rem;margin-top:2px">1 = direita · -1 = esquerda</p>
+        </div>
+      </div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="px" style="height:170px">
+        <img src="./prints/9.png">
+      </div>
+      <div class="tip">
+        <span class="ico">💡</span>
+        <p><strong><code>direcao</code></strong> vale <code>1</code> (direita) ou <code>-1</code> (esquerda) — com isso um só evento controla os dois lados!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S10 EVENT SHEET INTRO ═══════════ -->
+<div class="slide" id="s10">
+  <div class="badge">Passo B · 3 de 5 — Event Sheet</div>
+  <h2>📋 Abrindo a Event Sheet</h2>
+  <div class="g12">
+    <div>
+      <div class="sr"><div class="sc grn">1</div><div>
+        <p>No painel <strong>Project</strong> (esquerda), expanda <strong>"Event sheets"</strong></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Se não aparecer, vá em <strong>View → Project</strong></p>
+      </div></div>
+      <div class="sr"><div class="sc grn">2</div><div>
+        <p>Dê duplo clique em <strong>"Event sheet 1"</strong></p>
+      </div></div>
+      <div class="sr"><div class="sc grn">3</div><div>
+        <p>Vamos criar um <strong>Grupo</strong> para organizar:<br>
+        Clique direito → <strong>"Add group"</strong></p>
+        <div class="uipath"><span class="ui">Clique direito</span><span class="arr">›</span><span class="ui">Add group</span></div>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5);margin-top:4px">Nome do grupo: <code>IA - Patrulha</code></p>
+      </div></div>
+      <div class="tip" style="margin-top:10px">
+        <span class="ico">📁</span>
+        <p><strong>Grupos</strong> são pastas de eventos. Deixam tudo organizado e podem ser ligados/desligados com um clique!</p>
+      </div>
+      <div style="margin-top:12px">
+        <p style="margin-bottom:8px;font-weight:700">🗂️ Grupos que vamos criar:</p>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="background:rgba(255,211,61,.15);border-left:4px solid #ffd93d;border-radius:6px;padding:7px 12px;font-size:.88rem">📁 IA - Patrulha</div>
+          <div style="background:rgba(255,107,107,.15);border-left:4px solid #ff6b6b;border-radius:6px;padding:7px 12px;font-size:.88rem">📁 IA - Detecção</div>
+          <div style="background:rgba(139,233,253,.15);border-left:4px solid #8be9fd;border-radius:6px;padding:7px 12px;font-size:.88rem">📁 IA - Perseguição</div>
+          <div style="background:rgba(107,203,119,.15);border-left:4px solid #6bcb77;border-radius:6px;padding:7px 12px;font-size:.88rem">📁 NPC - Diálogo</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="px" style="height:160px">
+        <img src="./prints/10.png">
+      </div>
+      <div class="px" style="height:120px">
+        <img src="./prints/11.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S11 EVENTO PATRULHA MOVIMENTO ═══════════ -->
+<div class="slide" id="s11">
+  <div class="badge">Passo B · 4 de 5 — Eventos de Patrulha</div>
+  <h2>😴 Evento 1 — Mover na Direção</h2>
+  <div class="g12">
+    <div>
+      <p style="margin-bottom:12px">Dentro do grupo <strong>"IA - Patrulha"</strong>, clique em <strong>"Add event"</strong>:</p>
+      <h3 style="color:#ffd93d;margin-bottom:8px">📌 Como adicionar um Evento:</h3>
+      <div class="sr"><div class="sc yel">1</div><div>
+        <p>Clique em <strong>"Add event"</strong> (dentro do grupo)</p>
+      </div></div>
+      <div class="sr"><div class="sc yel">2</div><div>
+        <p>Selecione o objeto <strong>Inimigo</strong> → clique <strong>Next</strong></p>
+      </div></div>
+      <div class="sr"><div class="sc yel">3</div><div>
+        <p>Escolha a condição <strong>"Instance variable value"</strong></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Está em: Inimigo → Variables → Instance variable value</p>
+      </div></div>
+      <div class="sr"><div class="sc yel">4</div><div>
+        <p>Configure: <code>estado</code> <strong>=</strong> <code>"patrulha"</code> → <strong>Done</strong></p>
+      </div></div>
+      <div style="margin-top:10px">
+        <h3 style="color:#6bcb77;margin-bottom:8px">📌 Adicionando Sub-eventos:</h3>
+        <div class="sr"><div class="sc grn">5</div><div>
+          <p>Clique direito no evento criado → <strong>"Add sub-event"</strong></p>
+          <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Condição: <code>Inimigo → direcao</code> = <code>1</code></p>
+        </div></div>
+        <div class="sr"><div class="sc grn">6</div><div>
+          <p>Clique em <strong>"Add action"</strong> neste sub-evento:</p>
+          <div class="uipath"><span class="ui">Inimigo</span><span class="arr">›</span><span class="ui">Platform</span><span class="arr">›</span><span class="ui">Simulate control</span><span class="arr">›</span><span class="ui">Right</span></div>
+        </div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ev-row">
+        <div class="ev-label">EVENTO 1 — dentro do grupo "IA - Patrulha"</div>
+        <div class="ev-cond">🔵 Inimigo › estado = "patrulha"</div>
+        <div class="ev-sub">↳ 🔵 Inimigo › direcao = 1</div>
+        <div class="ev-act" style="padding-left:52px">✅ Inimigo Platform › Simulate control: Right</div>
+        <div class="ev-sub">↳ 🔵 Inimigo › direcao = -1</div>
+        <div class="ev-act" style="padding-left:52px">✅ Inimigo Platform › Simulate control: Left</div>
+      </div>
+      <div class="px" style="height:150px">
+        <img src="./prints/12.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S12 EVENTO VIRAR NA BORDA ═══════════ -->
+<div class="slide" id="s12">
+  <div class="badge">Passo B · 5 de 6 — Virar na Borda</div>
+  <h2>↩️ Evento 2 — Inimigo Vira na Borda</h2>
+  <div class="g12" style="margin-top:6px">
+    <div>
+      <h3 style="color:#ffd93d;margin-bottom:8px">📌 Evento 2 — Virar quando não há chão na frente:</h3>
+      <div class="sr"><div class="sc yel">1</div><div>
+        <p><strong>Add event → System → Compare two values</strong><br>
+        <code>Inimigo.estado</code> = <code>"patrulha"</code></p>
+      </div></div>
+      <div class="sr"><div class="sc yel">2</div><div>
+        <p><strong>Add another condition:</strong></p>
+        <div class="uipath"><span class="ui">Inimigo</span><span class="arr">›</span><span class="ui">Platform</span><span class="arr">›</span><span class="ui">Is on floor</span></div>
+      </div></div>
+      <div class="sr"><div class="sc yel">3</div><div>
+        <p>Mais uma condição <strong>com Negate ✅</strong>:</p>
+        <div class="uipath"><span class="ui">Inimigo</span><span class="arr">›</span><span class="ui">Overlaps at offset</span></div>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:5px;font-size:.83rem">
+          <p>Object: <code>Chao</code> · X: <code>Inimigo.direcao*32</code> · Y: <code>32</code></p>
+          <p style="color:#ff79c6;margin-top:3px">✅ Marque "Negate"! — checa se NÃO tem chão à frente</p>
+        </div>
+      </div></div>
+      <div class="sr"><div class="sc yel">4</div><div>
+        <p><strong>Action:</strong> <code>Inimigo → Set direcao = Inimigo.direcao * -1</code></p>
+      </div></div>
+      <div class="tip" style="margin-top:10px">
+        <span class="ico">💡</span>
+        <p>Funciona como se o inimigo "olhasse pro chão" na frente — se não tiver chão, vira!</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ev-row">
+        <div class="ev-label">EVENTO 2 — grupo "IA - Patrulha"</div>
+        <div class="ev-cond">🔵 Inimigo.estado = "patrulha"</div>
+        <div class="ev-cond">🔵 Inimigo Platform › Is on floor</div>
+        <div class="ev-cond" style="color:#ff6b6b">🔴 NOT Overlaps at offset Chao (X: dir*32, Y:32)</div>
+        <div class="ev-act">✅ Set direcao = Inimigo.direcao * -1</div>
+      </div>
+      <div class="px">
+        <img src="./prints/13.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S12B EVENTO VIRAR NA PAREDE ═══════════ -->
+<div class="slide" id="s12b">
+  <div class="badge">Passo B · 6 de 6 — Virar na Parede</div>
+  <h2>🧱 Evento 3 — Inimigo Vira ao Bater na Parede</h2>
+  <div class="g12" style="margin-top:6px">
+    <div>
+      <h3 style="color:#6bcb77;margin-bottom:8px">📌 Evento 3 — Virar ao colidir com parede:</h3>
+      <div class="sr"><div class="sc grn">1</div><div>
+        <p><strong>Add event → System → Compare two values</strong><br>
+        <code>Inimigo.estado</code> = <code>"patrulha"</code></p>
+      </div></div>
+      <div class="sr"><div class="sc grn">2</div><div>
+        <p><strong>Add another condition → Inimigo → Overlaps at offset</strong> (SEM Negate):</p>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:5px;font-size:.83rem">
+          <p>Object: <code>Chao</code> · X: <code>Inimigo.direcao * 40</code> · Y: <code>0</code></p>
+          <p style="color:#6272a4;margin-top:3px">Detecta parede na frente — sem Negate!</p>
+        </div>
+      </div></div>
+      <div class="sr"><div class="sc grn">3</div><div>
+        <p><strong>Action:</strong> <code>Inimigo → Set direcao = Inimigo.direcao * -1</code></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5);margin-top:3px">Inverte a direção — o inimigo "volta" da parede!</p>
+      </div></div>
+      <div class="tip" style="margin-top:10px">
+        <span class="ico">💡</span>
+        <p>Evento 2 = sem chão embaixo → vira. Evento 3 = parede na frente → vira. Juntos cobrem todos os casos!</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ev-row">
+        <div class="ev-label">EVENTO 3 — grupo "IA - Patrulha"</div>
+        <div class="ev-cond">🔵 Inimigo.estado = "patrulha"</div>
+        <div class="ev-cond">🔵 Overlaps at offset Chao (X: dir*40, Y:0)</div>
+        <div class="ev-act">✅ Set direcao = Inimigo.direcao * -1</div>
+      </div>
+      <div class="px">
+        <img src="./prints/14.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S13 DETECÇÃO - GRUPO ═══════════ -->
+<div class="slide" id="s13">
+  <div class="badge">Passo C · 1 de 4 — Detecção</div>
+  <h2>👁️ Evento 3 — Inimigo Detecta o Jogador</h2>
+  <p style="margin-bottom:8px">Agora no grupo <strong>"IA - Detecção"</strong> — clique <strong>"Add event"</strong>:</p>
+  <div class="g12">
+    <div>
+      <div class="warn" style="margin-bottom:10px">
+        <span class="ico">⚠️</span>
+        <div><p><strong>Por que não usar <code>distance()</code>?</strong> Ela mede distância em X <em>e</em> Y — se o player está numa plataforma acima ou abaixo, a distância total cresce demais e o inimigo nunca detecta. Usamos só o eixo X!</p></div>
+      </div>
+      <div class="sr"><div class="sc red">1</div><div>
+        <p>Selecione <strong>System</strong> → <strong>Compare two values</strong></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Configure: <code>Inimigo.estado</code> = <code>"patrulha"</code></p>
+      </div></div>
+      <div class="sr"><div class="sc red">2</div><div>
+        <p><strong>Add another condition:</strong> <code>System → Compare two values</code></p>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:.85rem">
+          <p>First value: <code style="color:#ffb86c">abs(Player.X - Inimigo.X)</code></p>
+          <p>Comparison: <code style="color:#ff79c6">&lt; (less than)</code></p>
+          <p>Second value: <code style="color:#50fa7b">200</code></p>
+        </div>
+        <p style="font-size:.82rem;color:rgba(255,255,255,.5);margin-top:4px"><code>abs()</code> remove o sinal negativo — funciona igual para os dois lados!</p>
+      </div></div>
+      <div class="sr"><div class="sc red">3</div><div>
+        <p><strong>Add action:</strong></p>
+        <div class="uipath"><span class="ui">Inimigo</span><span class="arr">›</span><span class="ui">Instance variables</span><span class="arr">›</span><span class="ui">Set value</span></div>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Variable: <code>estado</code> · Value: <code>"persegue"</code></p>
+      </div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ev-row">
+        <div class="ev-label">EVENTO 3 — grupo "IA - Detecção"</div>
+        <div class="ev-cond">🔵 Inimigo.estado = "patrulha"</div>
+        <div class="ev-cond">🔵 abs(Player.X - Inimigo.X) &lt; 200</div>
+        <div class="ev-act">✅ Inimigo › Set estado = "persegue"</div>
+      </div>
+      <div class="tip">
+        <span class="ico">💡</span>
+        <p>Só X → detecta em qualquer altura! O inimigo vê o player mesmo que ele esteja em outra plataforma.</p>
+      </div>
+      <div class="px" style="height:110px">
+        <img src="./prints/15.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S14 DETECÇÃO - PERDER ═══════════ -->
+<div class="slide" id="s14">
+  <div class="badge">Passo C · 2 de 4 — Detecção</div>
+  <h2>🚶 Evento 4 — Inimigo Perde o Jogador</h2>
+  <p style="margin-bottom:12px">Ainda no grupo <strong>"IA - Detecção"</strong> — <strong>"Add event"</strong>:</p>
+  <div class="g12">
+    <div>
+      <div class="sr"><div class="sc red">1</div><div>
+        <p><strong>System → Compare two values</strong></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Configure: <code>Inimigo.estado</code> = <code>"persegue"</code></p>
+      </div></div>
+      <div class="sr"><div class="sc red">2</div><div>
+        <p><strong>Add another condition</strong></p>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:.85rem">
+          <p>First value: <code style="color:#ffb86c">abs(Player.X - Inimigo.X)</code></p>
+          <p>Comparison: <code style="color:#ff79c6">&gt; (greater than)</code></p>
+          <p>Second value: <code style="color:#50fa7b">250</code></p>
+        </div>
+        <p style="font-size:.82rem;color:rgba(255,255,255,.5);margin-top:4px">Mesmo critério da detecção — só eixo X!</p>
+      </div></div>
+      <div class="sr"><div class="sc red">3</div><div>
+        <p><strong>Add action:</strong> <code>Inimigo → Set estado = "patrulha"</code></p>
+      </div></div>
+      <div class="tip" style="margin-top:10px">
+        <span class="ico">🎯</span>
+        <p><strong>Por que 250 e não 200?</strong> Se fosse o mesmo valor, o inimigo ficaria trocando de estado toda hora (flickering). Usar um número maior cria um "amortecedor"!</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ev-row">
+        <div class="ev-label">EVENTO 4 — grupo "IA - Detecção"</div>
+        <div class="ev-cond">🔵 System › Inimigo.estado = "persegue"</div>
+        <div class="ev-cond">🔵 System › abs(Player.X - Inimigo.X) &gt; 250</div>
+        <div class="ev-act">✅ Inimigo › Set estado = "patrulha"</div>
+      </div>
+      <div class="ev-row" style="margin-top:4px;border-color:#ffd93d55">
+        <div class="ev-label" style="background:#ffd93d33;color:#ffd93d">RESUMO — Grupo "IA - Detecção" completo</div>
+        <div class="ev-cond">🔵 estado="patrulha" AND abs(X) &lt; 200 → persegue</div>
+        <div class="ev-cond">🔵 estado="persegue" AND abs(X) &gt; 250 → patrulha</div>
+      </div>
+      <div class="px" style="height:110px">
+        <img src="./prints/16.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S15 PERSEGUIÇÃO ═══════════ -->
+<div class="slide" id="s15">
+  <div class="badge">Passo C · 3 de 4 — Perseguição</div>
+  <h2>🏃 Evento 5 — Perseguir o Jogador</h2>
+  <p style="margin-bottom:12px">No grupo <strong>"IA - Perseguição"</strong> — <strong>"Add event"</strong>:</p>
+  <div class="g12">
+    <div>
+      <div class="sr"><div class="sc red">1</div><div>
+        <p><strong>System → Compare two values</strong></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)"><code>Inimigo.estado</code> = <code>"persegue"</code></p>
+      </div></div>
+      <div class="sr"><div class="sc red">2</div><div>
+        <p><strong>Add sub-event</strong> (clique direito no evento):</p>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:.85rem">
+          <p style="color:#ffd93d">Sub-evento A — Player à DIREITA</p>
+          <p>System → Compare two values</p>
+          <p><code>Player.X</code> <strong>&gt;</strong> <code>Inimigo.X</code></p>
+          <p style="color:#7ee787;margin-top:4px">Action: Inimigo Platform → Simulate Right</p>
+        </div>
+      </div></div>
+      <div class="sr"><div class="sc red">3</div><div>
+        <p><strong>Add sub-event</strong> (outro, no mesmo nível):</p>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:.85rem">
+          <p style="color:#ffd93d">Sub-evento B — Player à ESQUERDA</p>
+          <p>System → Compare two values</p>
+          <p><code>Player.X</code> <strong>&lt;</strong> <code>Inimigo.X</code></p>
+          <p style="color:#7ee787;margin-top:4px">Action: Inimigo Platform → Simulate Left</p>
+        </div>
+      </div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ev-row">
+        <div class="ev-label">EVENTO 5 — grupo "IA - Perseguição"</div>
+        <div class="ev-cond">🔵 Inimigo.estado = "persegue"</div>
+        <div class="ev-sub">↳ 🔵 Player.X &gt; Inimigo.X</div>
+        <div class="ev-act" style="padding-left:52px">✅ Inimigo Platform → Simulate: Right</div>
+        <div class="ev-sub">↳ 🔵 Player.X &lt; Inimigo.X</div>
+        <div class="ev-act" style="padding-left:52px">✅ Inimigo Platform → Simulate: Left</div>
+      </div>
+      <div class="px" style="height:120px">
+        <img src="./prints/17.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S16 PULAR OBSTÁCULOS ═══════════ -->
+<div class="slide" id="s16">
+  <div class="badge">Passo C · 4 de 4 — Perseguição</div>
+  <h2>↩️ Evento 6 — Voltar ao Colidir com Parede</h2>
+  <p style="margin-bottom:12px">Ainda no grupo <strong>"IA - Perseguição"</strong> — mais um evento:</p>
+  <div class="g12">
+    <div>
+      <div class="tip" style="margin-bottom:10px">
+        <span class="ico">💡</span>
+        <div><p>Quando o inimigo está perseguindo e bate em uma parede (que não é o Player), ele inverte a direção — assim não fica preso!</p></div>
+      </div>
+      <div class="sr"><div class="sc red">1</div><div>
+        <p><strong>System → Compare two values</strong>: <code>Inimigo.estado</code> = <code>"persegue"</code></p>
+      </div></div>
+      <div class="sr"><div class="sc red">2</div><div>
+        <p><strong>Add another condition → Inimigo → Overlaps at offset</strong> (SEM Negate):</p>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:5px;font-size:.85rem">
+          <p>Object: <code>Chao</code> · X: <code>Inimigo.direcao * 40</code> · Y: <code>0</code></p>
+          <p style="color:#6272a4;margin-top:3px">Parede na frente — sem Negate!</p>
+        </div>
+      </div></div>
+      <div class="sr"><div class="sc red">3</div><div>
+        <p><strong>Add action:</strong></p>
+        <p style="font-size:.85rem;margin-top:4px"><code>Inimigo → Set direcao = Inimigo.direcao * -1</code></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Inverte a direção ao bater na parede!</p>
+      </div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ev-row">
+        <div class="ev-label">EVENTO 6 — grupo "IA - Perseguição"</div>
+        <div class="ev-cond">🔵 Inimigo.estado = "persegue"</div>
+        <div class="ev-cond">🔵 Overlaps at offset Chao (X: dir*40, Y:0)</div>
+        <div class="ev-act">✅ Set direcao = Inimigo.direcao * -1</div>
+      </div>
+      <div class="px" style="height:100px">
+        <img src="./prints/18.png">
+      </div>
+      <div class="tip">
+        <span class="ico">▶️</span>
+        <p>Teste! O inimigo deve perseguir e virar ao bater em paredes. Aperte <strong>F5</strong>!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S17 NPC SPRITE ═══════════ -->
+<div class="slide" id="s17">
+  <div class="badge">Passo D · 1 de 3 — NPC</div>
+  <h2>🗣️ Criando o Sprite do NPC</h2>
+  <div class="g12">
+    <div>
+      <div class="sr"><div class="sc grn">1</div><div>
+        <p>Dê <strong>duplo clique</strong> no layout → <strong>Sprite</strong> → <strong>Insert</strong></p>
+      </div></div>
+      <div class="sr"><div class="sc grn">2</div><div>
+        <p>Desenhe um personagem amigável (verde, sorrindo, etc.)</p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Tamanho sugerido: 48×64 pixels</p>
+      </div></div>
+      <div class="sr"><div class="sc grn">3</div><div>
+        <p>Nomeie como <code>NPC</code></p>
+      </div></div>
+      <div class="warn" style="margin:6px 0">
+        <span class="ico">⚠️</span>
+        <div>
+          <p><strong>NÃO adicione o Behavior Solid ao NPC!</strong></p>
+          <p style="font-size:.88rem;margin-top:4px">Se o NPC tiver Solid, o Player nunca vai <em>sobrepor</em> ele — a detecção de proximidade não funciona. Vamos usar <code>distance()</code> para detectar quando o player está perto!</p>
+        </div>
+      </div>
+      <div class="sr"><div class="sc grn">4</div><div>
+        <p>Clique direito no <code>NPC</code> → <strong>Instance variables…</strong> → crie:</p>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:.85rem">
+          <p>📛 Name: <code style="color:#50fa7b">npcFalando</code></p>
+          <p>🔢 Type: <code style="color:#8be9fd">Number</code></p>
+          <p>🔢 Initial value: <code style="color:#ffd93d">0</code></p>
+          <p style="color:#6272a4;margin-top:3px">0 = não está em diálogo · 1 = está falando</p>
+        </div>
+      </div></div>
+      <div class="sr"><div class="sc grn">5</div><div>
+        <p>Crie um objeto <strong>Text</strong> → nomeie <code>BalaoFala</code></p>
+        <p>Posicione acima do NPC → Properties → <strong>Initially visible: No</strong></p>
+      </div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="px" style="height:160px">
+        <img src="./prints/19.png">
+      </div>
+      <div class="tip">
+        <span class="ico">💡</span>
+        <p><code>npcFalando</code> é um "semáforo": quando vale <strong>1</strong>, nenhum outro evento sobrescreve o texto do balão!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S18 NPC EVENTOS ═══════════ -->
+<div class="slide" id="s18">
+  <div class="badge">Passo D · 2 de 4 — NPC</div>
+  <h2>💬 Evento 7 — Mostrar Balão ao Aproximar</h2>
+  <p style="margin-bottom:10px">No grupo <strong>"NPC - Diálogo"</strong> — clique <strong>"Add event"</strong>:</p>
+  <div class="g12">
+    <div>
+      <div class="warn" style="margin-bottom:10px">
+        <span class="ico">🐛</span>
+        <div><p><strong>Por que não usar "Is overlapping"?</strong> Overlap roda <em>todo tick</em> enquanto sobrepõe → apaga o texto do balão toda hora. Com <code>distance()</code> e a variável <code>npcFalando</code> controlamos exatamente quando o texto muda!</p></div>
+      </div>
+      <div class="sr"><div class="sc grn">1</div><div>
+        <p><strong>Add event → System → Compare two values</strong></p>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:5px;font-size:.84rem">
+          <p>First: <code style="color:#ffb86c">distance(Player.X,Player.Y,NPC.X,NPC.Y)</code></p>
+          <p>Comparison: <code style="color:#ff79c6">&lt; (less than)</code> · Second: <code style="color:#50fa7b">80</code></p>
+        </div>
+      </div></div>
+      <div class="sr"><div class="sc grn">2</div><div>
+        <p><strong>Add another condition → System → Compare two values</strong></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)"><code>NPC.npcFalando</code> = <code>0</code> &nbsp;← só se NÃO está falando!</p>
+      </div></div>
+      <div class="sr"><div class="sc grn">3</div><div>
+        <p><strong>Actions:</strong></p>
+        <p style="font-size:.85rem;margin-top:4px">1️⃣ <code>BalaoFala → Set visible</code></p>
+        <p style="font-size:.85rem">2️⃣ <code>BalaoFala → Set text: "Olá! Aperte E para falar! 👋"</code></p>
+      </div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ev-row">
+        <div class="ev-label">EVENTO 7 — grupo "NPC - Diálogo"</div>
+        <div class="ev-cond">🔵 distance(Player,NPC) &lt; 80</div>
+        <div class="ev-cond">🔵 NPC.npcFalando = 0</div>
+        <div class="ev-act">✅ BalaoFala → Set visible</div>
+        <div class="ev-act">✅ BalaoFala → Set text: "Olá! Aperte E para falar! 👋"</div>
+      </div>
+      <div class="px">
+        <img src="./prints/20.png">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S18B NPC SAIR ═══════════ -->
+<div class="slide" id="s18b">
+  <div class="badge">Passo D · 3 de 4 — NPC</div>
+  <h2>🚶 Evento 8 — Esconder Balão ao Sair</h2>
+  <p style="margin-bottom:10px">Ainda no grupo <strong>"NPC - Diálogo"</strong> — <strong>"Add event"</strong>:</p>
+  <div class="g12">
+    <div>
+      <div class="sr"><div class="sc grn">1</div><div>
+        <p><strong>Add event → System → Compare two values</strong></p>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:5px;font-size:.84rem">
+          <p>First: <code style="color:#ffb86c">distance(Player.X,Player.Y,NPC.X,NPC.Y)</code></p>
+          <p>Comparison: <code style="color:#ff79c6">&gt;= (greater or equal)</code> · Second: <code style="color:#50fa7b">80</code></p>
+        </div>
+      </div></div>
+      <div class="sr"><div class="sc grn">2</div><div>
+        <p><strong>Actions:</strong></p>
+        <p style="font-size:.85rem;margin-top:4px">1️⃣ <code>BalaoFala → Set invisible</code></p>
+        <p style="font-size:.85rem">2️⃣ <code>NPC → Set npcFalando = 0</code> &nbsp;← reset ao sair!</p>
+      </div></div>
+      <div class="tip" style="margin-top:10px">
+        <span class="ico">💡</span>
+        <p>O reset do <code>npcFalando</code> aqui garante que ao voltar perto do NPC o balão aparece normalmente!</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ev-row">
+        <div class="ev-label">EVENTO 8 — grupo "NPC - Diálogo"</div>
+        <div class="ev-cond">🔵 distance(Player,NPC) &gt;= 80</div>
+        <div class="ev-act">✅ BalaoFala → Set invisible</div>
+        <div class="ev-act">✅ NPC → Set npcFalando = 0</div>
+      </div>
+      <div class="px">
+        <img src="./prints/21.png">
+      </div>
+      <div class="tip">
+        <span class="ico">▶️</span>
+        <p>Teste! Aperte F5 → aproxime do NPC → o balão aparece. Afaste → some!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S19 NPC TECLA E ═══════════ -->
+<div class="slide" id="s19">
+  <div class="badge">Passo D · 4 de 4 — NPC</div>
+  <h2>⌨️ Evento 9 — Tecla E para Falar</h2>
+  <p style="margin-bottom:10px">Ainda no grupo <strong>"NPC - Diálogo"</strong> — <strong>"Add event"</strong>:</p>
+  <div class="g12">
+    <div>
+      <div class="sr"><div class="sc grn">1</div><div>
+        <p>Selecione <strong>Keyboard</strong> → <strong>On key pressed</strong></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5)">Clique no campo de tecla e aperte <strong>E</strong> no teclado</p>
+      </div></div>
+      <div class="sr"><div class="sc grn">2</div><div>
+        <p><strong>Add another condition → System → Compare two values</strong></p>
+        <div style="background:#0a0a18;border-radius:8px;padding:8px 12px;margin-top:5px;font-size:.84rem">
+          <p>First: <code style="color:#ffb86c">distance(Player.X,Player.Y,NPC.X,NPC.Y)</code></p>
+          <p>Comparison: <code style="color:#ff79c6">&lt;</code> · Second: <code style="color:#50fa7b">80</code></p>
+        </div>
+      </div></div>
+      <div class="sr"><div class="sc grn">3</div><div>
+        <p><strong>Add another condition → System → Compare two values</strong></p>
+        <p style="font-size:.85rem;color:rgba(255,255,255,.5);margin-top:4px"><code>NPC.npcFalando</code> = <code>0</code> &nbsp;← evita disparar duas vezes!</p>
+      </div></div>
+      <div class="sr"><div class="sc grn">4</div><div>
+        <p><strong>Actions em ordem:</strong></p>
+        <div style="background:#0a0a18;border-radius:8px;padding:10px 14px;margin-top:6px;font-size:.84rem;display:flex;flex-direction:column;gap:5px">
+          <p>1️⃣ <code>NPC → Set npcFalando = 1</code> <span style="color:#6272a4">← trava o Evento 7!</span></p>
+          <p>2️⃣ <code>BalaoFala → Set text: "Boa sorte, herói! ⚔️"</code></p>
+          <p>3️⃣ <code>System → Wait 3 seconds</code></p>
+          <p>4️⃣ <code>BalaoFala → Set text: "Até logo! 👋"</code></p>
+          <p>5️⃣ <code>System → Wait 1 second</code></p>
+          <p>6️⃣ <code>NPC → Set npcFalando = 0</code> <span style="color:#6272a4">← libera de novo!</span></p>
+        </div>
+      </div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ev-row">
+        <div class="ev-label">EVENTO 9 — grupo "NPC - Diálogo"</div>
+        <div class="ev-cond">🔵 Keyboard › On key E pressed</div>
+        <div class="ev-cond">🔵 distance(Player,NPC) &lt; 80</div>
+        <div class="ev-cond">🔵 NPC.npcFalando = 0</div>
+        <div class="ev-act">✅ NPC → Set npcFalando = 1</div>
+        <div class="ev-act">✅ BalaoFala → Set text: "Boa sorte, herói! ⚔️"</div>
+        <div class="ev-act">✅ System → Wait 3 s</div>
+        <div class="ev-act">✅ BalaoFala → Set text: "Até logo! 👋"</div>
+        <div class="ev-act">✅ System → Wait 1 s</div>
+        <div class="ev-act">✅ NPC → Set npcFalando = 0</div>
+      </div>
+      <div class="px" style="height:100px">
+        <img src="./prints/22.png">
+      </div>
+      <div class="tip">
+        <span class="ico">▶️</span>
+        <p><strong>Teste!</strong> Aperte F5 → aproxime do NPC → aperte E. O balão não deve mais piscar!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S20 EVENT SHEET FINAL ═══════════ -->
+<div class="slide" id="s20">
+  <div class="badge">Revisão · Event Sheet Completa</div>
+  <h2>📋 Visão Geral — Todos os Eventos</h2>
+  <div class="g2" style="margin-top:10px;gap:14px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="border-left:4px solid #ffd93d;background:rgba(255,211,61,.08);border-radius:0 12px 12px 0;padding:12px 16px">
+        <p style="color:#ffd93d;font-weight:700;margin-bottom:6px">📁 IA - Patrulha</p>
+        <div class="ev-row" style="margin-bottom:6px">
+          <div class="ev-cond" style="font-size:.8rem">Evento 1 › estado="patrulha" → Simulate direção</div>
+          <div class="ev-sub" style="font-size:.78rem">↳ direcao=1 → Right / direcao=-1 → Left</div>
+        </div>
+        <div class="ev-row" style="margin-bottom:6px">
+          <div class="ev-cond" style="font-size:.8rem">Evento 2 › patrulha + on floor + NOT borda → inverter direcao</div>
+        </div>
+        <div class="ev-row">
+          <div class="ev-cond" style="font-size:.8rem">Evento 3 › patrulha + on floor + parede frente → Jump</div>
+        </div>
+      </div>
+      <div style="border-left:4px solid #ff6b6b;background:rgba(255,107,107,.08);border-radius:0 12px 12px 0;padding:12px 16px">
+        <p style="color:#ff6b6b;font-weight:700;margin-bottom:6px">📁 IA - Detecção</p>
+        <div class="ev-row" style="margin-bottom:6px">
+          <div class="ev-cond" style="font-size:.8rem">Evento 4 › patrulha + dist &lt; 200 → persegue</div>
+        </div>
+        <div class="ev-row">
+          <div class="ev-cond" style="font-size:.8rem">Evento 5 › persegue + dist &gt; 250 → patrulha</div>
+        </div>
+      </div>
+      <div style="border-left:4px solid #8be9fd;background:rgba(139,233,253,.08);border-radius:0 12px 12px 0;padding:12px 16px">
+        <p style="color:#8be9fd;font-weight:700;margin-bottom:6px">📁 IA - Perseguição</p>
+        <div class="ev-row" style="margin-bottom:6px">
+          <div class="ev-cond" style="font-size:.8rem">Evento 6 › persegue → Simulate direção do player</div>
+        </div>
+        <div class="ev-row">
+          <div class="ev-cond" style="font-size:.8rem">Evento 7 › persegue + on floor + parede frente → Jump</div>
+        </div>
+      </div>
+      <div style="border-left:4px solid #6bcb77;background:rgba(107,203,119,.08);border-radius:0 12px 12px 0;padding:12px 16px">
+        <p style="color:#6bcb77;font-weight:700;margin-bottom:6px">📁 NPC - Diálogo &nbsp;<span style="font-size:.75rem;opacity:.7">usa distance() + npcFalando</span></p>
+        <div class="ev-row" style="margin-bottom:6px">
+          <div class="ev-cond" style="font-size:.8rem">Evento 8 › dist &lt; 80 + npcFalando=0 → mostrar balão</div>
+        </div>
+        <div class="ev-row" style="margin-bottom:6px">
+          <div class="ev-cond" style="font-size:.8rem">Evento 9 › dist &gt;= 80 → esconder balão + reset flag</div>
+        </div>
+        <div class="ev-row">
+          <div class="ev-cond" style="font-size:.8rem">Evento 10 › tecla E + dist&lt;80 + npcFalando=0 → diálogo</div>
+        </div>
+      </div>
+    </div>
+    <div class="px" style="height:400px">
+      <img src="./prints/23.png">
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ S21 DESAFIO ═══════════ -->
+<div class="slide light" id="s21">
+  <div class="badge" style="background:rgba(0,0,0,.15);color:#12121f">🏆 Desafio para Casa</div>
+  <h1 style="color:#12121f">Você consegue?</h1>
+  <div class="g3" style="margin-top:16px">
+    <div class="card">
+      <div style="font-size:2rem;text-align:center;margin-bottom:10px">⭐</div>
+      <h3 style="text-align:center;color:#333">Fácil</h3>
+      <ul style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+        <li style="color:#333">⬆️ Aumentar a velocidade do inimigo</li>
+        <li style="color:#333">👾 Adicionar um 2º inimigo na fase</li>
+        <li style="color:#333">🎨 Trocar o sprite do NPC</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div style="font-size:2rem;text-align:center;margin-bottom:10px">⭐⭐</div>
+      <h3 style="text-align:center;color:#333">Médio</h3>
+      <ul style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+        <li style="color:#333">💣 Inimigo que atira projétil</li>
+        <li style="color:#333">💬 NPC com 3 falas em sequência</li>
+        <li style="color:#333">🏃 Inimigo que foge com vida baixa</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div style="font-size:2rem;text-align:center;margin-bottom:10px">⭐⭐⭐</div>
+      <h3 style="text-align:center;color:#333">Difícil</h3>
+      <ul style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+        <li style="color:#333">👑 Chefão com 3 fases de IA</li>
+        <li style="color:#333">📡 Inimigos que chamam reforços</li>
+        <li style="color:#333">📜 NPC com missão e objetivo</li>
+      </ul>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:24px">
+    <div style="font-size:2.8rem;margin-bottom:10px">🎉🎮🚀</div>
+    <h2 style="color:#12121f">Parabéns! Você fez IA de verdade!</h2>
+    <p style="color:#333;margin-top:8px">Tente implementar suas próprias ideias! 👇</p>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<div class="nav">
+  <button id="bp" onclick="go(-1)" disabled>◀ Anterior</button>
+  <span id="ctr">1 / 21</span>
+  <button id="bn" onclick="go(1)">Próximo ▶</button>
+</div>
+
+<script>
+const IDS=['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s12b','s13','s14','s15','s16','s17','s18','s18b','s19','s20','s21'];
+const N=IDS.length; let cur=0;
+function go(d){
+  const prev=document.getElementById(IDS[cur]);
+  cur=Math.max(0,Math.min(N-1,cur+d));
+  const next=document.getElementById(IDS[cur]);
+  prev.style.opacity='0';
+  setTimeout(()=>{prev.classList.remove('on');next.classList.add('on');setTimeout(()=>next.style.opacity='1',10);},300);
+  document.getElementById('ctr').textContent=(cur+1)+' / '+N;
+  document.getElementById('bp').disabled=(cur===0);
+  document.getElementById('bn').disabled=(cur===N-1);
+  document.getElementById('prog').style.width=(((cur+1)/N)*100)+'%';
+}
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown',' '].includes(e.key)){e.preventDefault();go(1);}
+  if(['ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();go(-1);}
+});
+document.getElementById('prog').style.width=((1/N)*100)+'%';
+document.getElementById('ctr').textContent='1 / '+N;
+</script>
+</body>
+</html>
